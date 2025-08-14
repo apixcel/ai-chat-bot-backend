@@ -10,8 +10,8 @@ function generateAppApiKey() {
   return hashKey;
 }
 
-const appUtils = {
+const clientAppUtils = {
   generateAppApiKey,
 };
 
-export default appUtils;
+export default clientAppUtils;

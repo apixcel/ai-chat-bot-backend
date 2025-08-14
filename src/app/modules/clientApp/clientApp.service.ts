@@ -1,8 +1,8 @@
 import AppError from "../../errors/AppError";
 import prisma from "../../lib/prisma";
-import appUtils from "../../utils/app.utils";
-import subscriptionUtils from "../../utils/subscription.utils";
+import subscriptionUtils from "../subscription/subscription.utils";
 import { TClientAppCreatePayload } from "./clientApp.interface";
+import clientAppUtils from "./clientApp.utils";
 
 const createApp = async (payload: TClientAppCreatePayload, userId: string) => {
   const subscriptionId = await subscriptionUtils.getUserCurrentSubscriptionId(userId);
@@ -32,7 +32,7 @@ const createApp = async (payload: TClientAppCreatePayload, userId: string) => {
     throw new AppError(400, "You have reached the maximum number of apps");
   }
 
-  const apiKey = appUtils.generateAppApiKey();
+  const apiKey = clientAppUtils.generateAppApiKey();
 
   const app = await prisma.app.create({
     data: {

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IUserJWTPayload } from "../interface/auth.interface";
+import { IUserJWTPayload } from "../modules/auth/auth.interface";
 
 export interface IUserInfoRequest extends Request {
   user?: IUserJWTPayload;

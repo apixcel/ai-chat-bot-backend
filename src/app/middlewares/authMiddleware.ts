@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import config from "../config";
 import AppError from "../errors/AppError";
-import { IUserJWTPayload } from "../interface/auth.interface";
 import prisma from "../lib/prisma";
+import { IUserJWTPayload } from "../modules/auth/auth.interface";
 import authUtils from "../modules/auth/auth.utils";
 import catchAsyncError from "../utils/catchAsync";
 

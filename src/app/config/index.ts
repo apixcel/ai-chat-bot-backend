@@ -14,6 +14,9 @@ const {
   STRIPE_SECRET_KEY,
   SERVER_URL,
   STRIPE_WEBHOOK_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI,
 } = process.env;
 export default {
   DATABASE_URL: DATABASE_URL,
@@ -36,4 +39,7 @@ export default {
   GEMINI_API_KEY,
   frontend_base_url: NODE_ENV === "development" ? "http://localhost:3000" : FRONTEND_BASE_URL,
   STRIPE_WEBHOOK_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URI,
 };

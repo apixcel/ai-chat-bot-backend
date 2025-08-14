@@ -1,6 +1,7 @@
 import express from "express";
 import authRoute from "../modules/auth/auth.route";
 import clientAppRoute from "../modules/clientApp/clientApp.route";
+import googleAuthRoute from "../modules/googleAuth/googleAuth.route";
 import subscriptionRoute from "../modules/subscription/subscription.route";
 import chatRoute from "./chat.route";
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/app",
     route: clientAppRoute,
+  },
+  {
+    path: "/google",
+    route: googleAuthRoute,
   },
 ];
 

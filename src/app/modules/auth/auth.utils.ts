@@ -3,8 +3,8 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import config from "../../config";
 import AppError from "../../errors/AppError";
-import { IUserJWTPayload } from "../../interface/auth.interface";
 import prisma from "../../lib/prisma";
+import { IUserJWTPayload } from "./auth.interface";
 
 const generateAccessToken = (payload: IUserJWTPayload) => {
   const { EXPIRY, SECRET = "" } = config.ACCESS_TOKEN;

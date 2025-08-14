@@ -8,20 +8,21 @@ datasource db {
 }
 
 model User {
-  id                    String         @id @default(uuid())
-  email                 String         @unique
+  id                    String           @id @default(uuid())
+  email                 String           @unique
   avatar                String?
   first_name            String
   last_name             String
   password              String
   role                  UserRole
-  isVerified            Boolean        @default(false)
-  currentSubscriptionId String         @default("")
+  isVerified            Boolean          @default(false)
+  currentSubscriptionId String           @default("")
   Subscription          Subscription[]
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
+  createdAt             DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime         @updatedAt @db.Timestamptz(3)
   App                   App[]
   Otp                   Otp?
+  GoogleAuthToken       GoogleAuthToken?
 }
 
 model Otp {
@@ -29,7 +30,7 @@ model Otp {
   user     User     @relation(fields: [userId], references: [id])
   userId   String   @unique
   code     String
-  coolDown DateTime
+  coolDown DateTime @db.Timestamptz(3)
 }
 
 model Plan {
@@ -42,7 +43,7 @@ model Plan {
   trialPeriodDays Int            @default(0) //FREE PLAN DAYS
   isActive        Boolean        @default(true)
   Subscription    Subscription[]
-  createdAt       DateTime       @default(now())
+  createdAt       DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime       @updatedAt
 }
 
@@ -57,7 +58,7 @@ model Subscription {
   startDate       DateTime
   status          SubscriptionStatus
   isActive        Boolean            @default(true)
-  createdAt       DateTime           @default(now())
+  createdAt       DateTime           @default(now()) @db.Timestamptz(3)
 }
 
 model App {
@@ -67,8 +68,19 @@ model App {
   apiKeyHash       String   @unique
   userId           String
   user             User     @relation(fields: [userId], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model GoogleAuthToken {
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  accessToken  String?
+  refreshToken String?
+  scope        String?
+  tokenType    String?
+  expiry_date  DateTime @db.Timestamptz(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
 }
 
 enum UserRole {

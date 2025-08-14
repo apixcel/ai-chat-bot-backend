@@ -6,7 +6,7 @@ import { ZodError } from "zod";
 import AppError from "../errors/AppError";
 import handleDuplicateError from "../errors/handleDuplicateError";
 import handleZodError from "../errors/zodError";
-import { IErrorSources } from "../interface/error";
+import { IErrorSources } from "../interface/error.interface";
 
 // eslint-disable-next-line no-unused-vars
 const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {

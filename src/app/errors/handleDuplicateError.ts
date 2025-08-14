@@ -1,4 +1,4 @@
-import { IErrorSources, IGenericErrorRes } from "../interface/error";
+import { IErrorSources, IGenericErrorRes } from "../interface/error.interface";
 
 const handleDuplicateError = (err: Error): IGenericErrorRes => {
   const errorSources: IErrorSources = [

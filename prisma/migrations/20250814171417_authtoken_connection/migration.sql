@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."GoogleAuthToken" ADD COLUMN     "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

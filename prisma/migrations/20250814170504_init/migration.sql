@@ -15,8 +15,8 @@ CREATE TABLE "public"."User" (
     "role" "public"."UserRole" NOT NULL,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "currentSubscriptionId" TEXT NOT NULL DEFAULT '',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -26,7 +26,7 @@ CREATE TABLE "public"."Otp" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "code" TEXT NOT NULL,
-    "coolDown" BIGINT NOT NULL,
+    "coolDown" TIMESTAMPTZ(3) NOT NULL,
 
     CONSTRAINT "Otp_pkey" PRIMARY KEY ("id")
 );
@@ -41,7 +41,7 @@ CREATE TABLE "public"."Plan" (
     "customization" BOOLEAN NOT NULL,
     "trialPeriodDays" INTEGER NOT NULL DEFAULT 0,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
@@ -57,7 +57,7 @@ CREATE TABLE "public"."Subscription" (
     "startDate" TIMESTAMP(3) NOT NULL,
     "status" "public"."SubscriptionStatus" NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
 );
@@ -69,10 +69,20 @@ CREATE TABLE "public"."App" (
     "authorizedOrigin" TEXT NOT NULL,
     "apiKeyHash" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ(3) NOT NULL,
 
     CONSTRAINT "App_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."GoogleAuthToken" (
+    "userId" TEXT NOT NULL,
+    "accessToken" TEXT,
+    "refreshToken" TEXT,
+    "scope" TEXT,
+    "tokenType" TEXT,
+    "expiry_date" TIMESTAMPTZ(3) NOT NULL
 );
 
 -- CreateIndex
@@ -83,6 +93,9 @@ CREATE UNIQUE INDEX "Otp_userId_key" ON "public"."Otp"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "App_apiKeyHash_key" ON "public"."App"("apiKeyHash");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GoogleAuthToken_userId_key" ON "public"."GoogleAuthToken"("userId");
 
 -- AddForeignKey
 ALTER TABLE "public"."Otp" ADD CONSTRAINT "Otp_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -95,3 +108,6 @@ ALTER TABLE "public"."Subscription" ADD CONSTRAINT "Subscription_planId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "public"."App" ADD CONSTRAINT "App_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."GoogleAuthToken" ADD CONSTRAINT "GoogleAuthToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

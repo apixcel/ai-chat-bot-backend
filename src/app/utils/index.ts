@@ -7,5 +7,11 @@ const getFileContent = (filePath: string) => {
   return file;
 };
 
+const getPassThroughRedirectUrl = (params: Record<string, string | number>) => {
+  const query = Object.keys(params)
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+  return `${config.frontend_base_url}/pass-through?${query}`;
+};
 
-export { getFileContent };
+export { getFileContent , getPassThroughRedirectUrl};

@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
-import AppError from "../errors/AppError";
-import prisma from "../lib/prisma";
-import planSeed, { freePlanId } from "./plan.utils";
+import AppError from "../../errors/AppError";
+import prisma from "../../lib/prisma";
+import planSeed, { freePlanId } from "../../utils/plan.utils";
 
 interface IProps {
   durationInMonths: number;
