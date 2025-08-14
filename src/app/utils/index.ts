@@ -14,4 +14,4 @@ const getPassThroughRedirectUrl = (params: Record<string, string | number>) => {
   return `${config.frontend_base_url}/pass-through?${query}`;
 };
 
-export { getFileContent , getPassThroughRedirectUrl};
+export { getFileContent, getPassThroughRedirectUrl };
