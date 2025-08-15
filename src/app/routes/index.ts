@@ -3,15 +3,10 @@ import authRoute from "../modules/auth/auth.route";
 import clientAppRoute from "../modules/clientApp/clientApp.route";
 import googleAuthRoute from "../modules/googleAuth/googleAuth.route";
 import subscriptionRoute from "../modules/subscription/subscription.route";
-import chatRoute from "./chat.route";
 
 const router = express.Router();
 
 const moduleRoutes = [
-  {
-    path: "/chat",
-    route: chatRoute,
-  },
   {
     path: "/auth",
     route: authRoute,

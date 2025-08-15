@@ -1,3 +1,5 @@
+import { google } from "googleapis";
+import AppError from "../../errors/AppError";
 import prisma from "../../lib/prisma";
 import googleAuthUtils from "./googleAuth.utils";
 
@@ -66,9 +68,33 @@ const myGoogleConnection = async (userId: string) => {
   return { connected: true, hasRequiredScopes, createdAt: row.createdAt };
 };
 
+const myGoogleDocList = async (userId: string) => {
+  const auth = await googleAuthUtils.getAuthForUser(userId);
+  if (!auth) {
+    throw new AppError(404, "Failed to load Google Docs, please again connect your google account");
+  }
+  const drive = google.drive({ version: "v3", auth });
+  const files = [];
+  let pageToken: string | undefined = undefined;
+  do {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const { data } = await drive.files.list({
+      q: "mimeType='application/vnd.google-apps.document' and trashed=false and 'me' in owners",
+      fields: "nextPageToken, files(id,name,owners(displayName),modifiedTime)",
+      pageSize: 100,
+      pageToken,
+    });
+    files.push(...(data.files || []));
+    pageToken = data.nextPageToken;
+  } while (pageToken);
+  return files;
+};
+
 const googleAuthService = {
   connectGoogle,
   myGoogleConnection,
+  myGoogleDocList,
 };
 
 export default googleAuthService;

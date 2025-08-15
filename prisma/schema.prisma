@@ -66,6 +66,7 @@ model App {
   appName          String
   authorizedOrigin String
   apiKeyHash       String   @unique
+  googleDocId      String   @default("")
   userId           String
   user             User     @relation(fields: [userId], references: [id])
   createdAt        DateTime @default(now()) @db.Timestamptz(3)

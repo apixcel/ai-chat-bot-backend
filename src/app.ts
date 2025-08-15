@@ -1,7 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
-import config from "./app/config";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import subscriptionWebhook from "./app/modules/subscription/subscription.webhook";
@@ -20,7 +19,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: [config.frontend_base_url!],
+    origin: (origin, cb) => cb(null, origin || true),
     credentials: true,
   })
 );

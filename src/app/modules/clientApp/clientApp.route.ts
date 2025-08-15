@@ -4,7 +4,7 @@ import clientAppController from "./clientApp.controller";
 
 const router = Router();
 
-router.use(authMiddleware.isAuthenticateUser);
+router.use(authMiddleware.isAuthenticateUser());
 
 router.post("/create", clientAppController.creatApp);
 router.get("/get", clientAppController.getUsersAllApps);

@@ -5,7 +5,7 @@ const router = Router();
 
 router.post(
   "/create",
-  authMiddleware.isAuthenticateUser,
+  authMiddleware.isAuthenticateUser(),
   subscriptionController.createSubscription
 );
 

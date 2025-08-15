@@ -15,7 +15,7 @@ const generateAccessToken = (payload: IUserJWTPayload) => {
 
 const generateRefreshToken = (id: string) => {
   const { EXPIRY, SECRET = "" } = config.REFRESH_TOKEN;
-  const token = jwt.sign({ _id: id }, SECRET, { expiresIn: EXPIRY });
+  const token = jwt.sign({ id: id }, SECRET, { expiresIn: EXPIRY });
   return token;
 };
 const generateForgotPasswordToken = (id: string) => {

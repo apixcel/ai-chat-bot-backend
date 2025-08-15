@@ -9,8 +9,8 @@ const router = Router();
 router.post("/login", validSchema(authValidation.login), authController.login);
 router.post("/register", validSchema(authValidation.register), authController.register);
 
-router.post("/logout", authMiddleware.isAuthenticateUser, authController.logout);
-router.get("/author", authMiddleware.isAuthenticateUser, authController.author);
+router.post("/logout", authMiddleware.isAuthenticateUser(), authController.logout);
+router.get("/author", authMiddleware.isAuthenticateUser(), authController.author);
 router.post("/refresh-token", authController.refreshToken);
 router.post("/forgot-password", authController.forgotPassword);
 router.post(
@@ -24,7 +24,7 @@ router.post(
   validSchema(authValidation.resetPassword),
   authController.resetPassword
 );
-router.put("/change-password", authMiddleware.isAuthenticateUser, authController.changePassword);
+router.put("/change-password", authMiddleware.isAuthenticateUser(), authController.changePassword);
 
 const authRoute = router;
 export default authRoute;

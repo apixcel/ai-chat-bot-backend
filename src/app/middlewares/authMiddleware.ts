@@ -1,102 +1,93 @@
+import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import config from "../config";
 import AppError from "../errors/AppError";
 import prisma from "../lib/prisma";
 import { IUserJWTPayload } from "../modules/auth/auth.interface";
-import authUtils from "../modules/auth/auth.utils";
-import catchAsyncError from "../utils/catchAsync";
+import chatBotUtils from "../modules/chatBot/chatBot.utils";
+import { IUserInfoRequest } from "../utils/catchAsync";
 
-const isAuthenticateUser = catchAsyncError(async (req, res, next) => {
-  const accessToken = req.cookies.accessToken;
+const isAuthenticateUser = (isOptional?: boolean) => {
+  return async (req: IUserInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      const token = req.cookies.accessToken;
+      if (!token && isOptional === true) {
+        return next();
+      }
 
-  if (!accessToken || authUtils.isTokenExpired(accessToken)) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-      throw new AppError(403, "Unauthorized");
-    }
+      if (!token) {
+        throw new AppError(401, "Unauthorized");
+      }
 
-    const decryptedJwt = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string
-    ) as IUserJWTPayload;
+      let decoded: IUserJWTPayload | undefined = undefined;
 
-    const result = await prisma.user.findUnique({
-      where: {
-        id: decryptedJwt.id,
-      },
-    });
+      try {
+        decoded = jwt.verify(token, config.ACCESS_TOKEN.SECRET as string) as IUserJWTPayload;
+      } catch {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
 
-    if (!result) {
-      throw new AppError(403, "Unauthorized");
-    }
+      if (!decoded && isOptional === false) {
+        throw new AppError(401, "Invalid Authentications.");
+      }
 
-    const newAccessToken = authUtils.generateAccessToken({
-      id: result?.id,
-      email: result?.email,
-      role: result?.role,
-    });
-
-    const newRefreshToken = authUtils.generateRefreshToken(decryptedJwt.id.toString());
-
-    res
-      .cookie("accessToken", newAccessToken, {
-        sameSite: config.NODE_ENV === "production" ? "none" : "strict",
-        maxAge: 1000 * 60 * 60, // 1 hour
-        httpOnly: true,
-        secure: config.NODE_ENV === "production",
-      })
-      .cookie("refreshToken", newRefreshToken, {
-        sameSite: config.NODE_ENV === "production" ? "none" : "strict",
-        maxAge: 1000 * 24 * 60 * 60 * 30, // 30 days
-        httpOnly: true,
-        secure: config.NODE_ENV === "production",
+      const user = await prisma.user.findUnique({
+        where: {
+          id: decoded?.id,
+        },
       });
+      if (!user) {
+        if (isOptional === true) {
+          return next();
+        }
+        throw new AppError(404, "User does not exist.");
+      }
+      const payload = user;
+      req.user = {
+        id: payload.id,
+        email: payload.email,
+        role: payload.role,
+      };
 
-    const isExistUsr = await prisma.user.findUnique({
-      where: {
-        id: decryptedJwt.id,
-      },
-    });
-    if (!isExistUsr) {
-      throw new AppError(403, "Unauthorized");
+      next();
+    } catch (err) {
+      next(err);
     }
+  };
+};
 
-    const auth = {
-      id: isExistUsr.id,
-      email: isExistUsr.email,
-      role: isExistUsr.role,
+const validateBotAccessToken = async (req: IUserInfoRequest, res: Response, next: NextFunction) => {
+  try {
+    const getToken = req.header("Authorization");
+
+    if (!getToken) {
+      throw new AppError(401, "Unauthorized");
+    }
+    const token = getToken.split("Bearer ")[1];
+    if (!token) {
+      throw new AppError(401, "Unauthorized");
+    }
+    const decoded = chatBotUtils.decodeChatBotAccessToken(token);
+    if (!decoded) {
+      throw new AppError(401, "Unauthorized");
+    }
+    const origin = `${req.protocol}://${req.get("host")}`;
+
+    if (decoded.authorizedOrigin !== origin) {
+      throw new AppError(403, "Forbidden");
+    }
+    req.bot = {
+      appId: decoded.appId,
+      authorizedOrigin: decoded.authorizedOrigin,
+      docId: decoded.docId,
+      ownerId: decoded.ownerId,
     };
-
-    req.user = auth;
+  } catch (err) {
+    next(err);
   }
-
-  if (accessToken && !authUtils.isTokenExpired(accessToken)) {
-    const payload = authUtils.verifyAccessToken(accessToken);
-    if (!payload) {
-      throw new AppError(403, "Unauthorized");
-    }
-    const { id } = payload as { id: string; email: string; role: string };
-    const isExistUsr = await prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
-    if (!isExistUsr) {
-      throw new AppError(403, "Unauthorized");
-    }
-
-    const auth = {
-      id: isExistUsr.id,
-      email: isExistUsr.email,
-      role: isExistUsr.role,
-    };
-
-    req.user = auth;
-  }
-
-  next();
-});
+};
 
 export default {
   isAuthenticateUser,
+  validateBotAccessToken,
 };

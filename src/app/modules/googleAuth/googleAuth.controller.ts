@@ -77,6 +77,22 @@ const myGoogleConnection = catchAsyncError(async (req, res) => {
   });
 });
 
-const googleAuthController = { connectGoogle, googelAuthCallBack, myGoogleConnection };
+const myGoogleDocList = catchAsyncError(async (req, res) => {
+  const result = await googleAuthService.myGoogleDocList(req.user!.id);
+
+  sendResponse(res, {
+    data: result,
+    message: "Google doc list retrieved successfully",
+    statusCode: 200,
+    success: true,
+  });
+});
+
+const googleAuthController = {
+  connectGoogle,
+  googelAuthCallBack,
+  myGoogleConnection,
+  myGoogleDocList,
+};
 
 export default googleAuthController;

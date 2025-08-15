@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { IUserJWTPayload } from "../modules/auth/auth.interface";
+import { IChatBotJWTPayload } from "../modules/chatBot/chatBot.interface";
 
 export interface IUserInfoRequest extends Request {
   user?: IUserJWTPayload;
+  bot?: IChatBotJWTPayload;
 }
 
 // eslint-disable-next-line no-unused-vars

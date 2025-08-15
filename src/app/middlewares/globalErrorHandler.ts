@@ -21,7 +21,9 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
     },
   ];
 
-  console.dir(error, { depth: null, colors: true, maxArrayLength: null });
+  if (isDev) {
+    console.dir(error, { depth: null, colors: true, maxArrayLength: null });
+  }
 
   if (error instanceof ZodError && isDev) {
     const simpleErr = handleZodError(error);
@@ -42,7 +44,7 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
         message: error?.message,
       },
     ];
-  } else if (error instanceof Error) {
+  } else if (error instanceof Error && isDev) {
     message = error.message;
     errorMessages = [
       {
