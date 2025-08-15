@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import path from "path";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import subscriptionWebhook from "./app/modules/subscription/subscription.webhook";
@@ -14,6 +15,7 @@ app.post(
   subscriptionWebhook.subscriptionComplete
 );
 
+app.use("/assets", express.static(path.join(process.cwd(), "public")));
 // parsers
 app.use(cookieParser());
 app.use(express.json());

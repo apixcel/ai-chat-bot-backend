@@ -71,7 +71,9 @@ const validateBotAccessToken = async (req: IUserInfoRequest, res: Response, next
     if (!decoded) {
       throw new AppError(401, "Unauthorized");
     }
-    const origin = `${req.protocol}://${req.get("host")}`;
+    const origin = req.get("origin") || new URL(req.get("referer") || "").origin;
+
+    console.log(decoded, origin);
 
     if (decoded.authorizedOrigin !== origin) {
       throw new AppError(403, "Forbidden");
@@ -82,6 +84,8 @@ const validateBotAccessToken = async (req: IUserInfoRequest, res: Response, next
       docId: decoded.docId,
       ownerId: decoded.ownerId,
     };
+
+    next();
   } catch (err) {
     next(err);
   }

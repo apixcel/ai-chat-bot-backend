@@ -1,5 +1,6 @@
 import express from "express";
 import authRoute from "../modules/auth/auth.route";
+import chatBotRoute from "../modules/chatBot/chatBot.route";
 import clientAppRoute from "../modules/clientApp/clientApp.route";
 import googleAuthRoute from "../modules/googleAuth/googleAuth.route";
 import subscriptionRoute from "../modules/subscription/subscription.route";
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/google",
     route: googleAuthRoute,
+  },
+  {
+    path: "/chat-bot",
+    route: chatBotRoute,
   },
 ];
 

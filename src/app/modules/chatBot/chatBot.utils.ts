@@ -1,10 +1,10 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import jwt from "jsonwebtoken";
 import config from "../../config";
 import { IChatBotJWTPayload } from "./chatBot.interface";
-
-const createChatBotAccessToken = ({ appId, docId, ownerId }: IChatBotJWTPayload) => {
+const createChatBotAccessToken = (payload: IChatBotJWTPayload) => {
   const { EXPIRY, SECRET = "" } = config.CHAT_BOT_ACCESS_TOKEN;
-  const token = jwt.sign({ appId, docId, ownerId }, SECRET, { expiresIn: EXPIRY });
+  const token = jwt.sign(payload, SECRET, { expiresIn: EXPIRY });
   return token;
 };
 
@@ -27,9 +27,18 @@ export const setBotAccessToken = ({ token, expireAt }: { token: string; expireAt
   botAccessToken = { token, expireAt };
 };
 
+const getGemini = (model?: string) => {
+  const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY!);
+
+  // For text-only input, use the gemini-pro model
+  const genModel = genAI.getGenerativeModel({ model: model || "gemini-1.5-flash" });
+
+  return genModel;
+};
 const chatBotUtils = {
   createChatBotAccessToken,
   decodeChatBotAccessToken,
+  getGemini,
 };
 
 export default chatBotUtils;
