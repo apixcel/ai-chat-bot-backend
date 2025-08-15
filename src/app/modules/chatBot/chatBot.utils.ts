@@ -18,7 +18,6 @@ const decodeChatBotAccessToken = (token: string) => {
   }
 };
 
-
 // for caching use redis in future
 let botAccessToken: { token: string; expireAt: string } | null = null;
 
