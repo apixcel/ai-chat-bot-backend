@@ -1,3 +1,4 @@
+import { App } from "@prisma/client";
 import AppError from "../../errors/AppError";
 import prisma from "../../lib/prisma";
 import subscriptionUtils from "../subscription/subscription.utils";
@@ -98,11 +99,35 @@ const getAppApiKeyByAppId = async (appId: string, userId: string) => {
   return app;
 };
 
+const UpdateAppByAppId = async (appId: string, userId: string, payload: Partial<App>) => {
+  const app = await prisma.app.findUnique({
+    where: { id: appId },
+    select: {
+      apiKeyHash: true,
+      userId: true,
+    },
+  });
+
+  if (!app) {
+    throw new AppError(404, "App not found");
+  }
+
+  if (app.userId !== userId) {
+    throw new AppError(403, "Forbidden");
+  }
+
+  ["apiKeyHash", "userId"].forEach((key) => delete payload[key as keyof App]);
+
+  const result = await prisma.app.update({ where: { id: appId }, data: payload });
+  return { ...result, apiKeyHash: undefined };
+};
+
 const clientAppService = {
   createApp,
   getUsersAllApps,
   getAppById,
   getAppApiKeyByAppId,
+  UpdateAppByAppId,
 };
 
 export default clientAppService;

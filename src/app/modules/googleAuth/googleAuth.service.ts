@@ -76,19 +76,20 @@ const myGoogleDocList = async (userId: string) => {
   const drive = google.drive({ version: "v3", auth });
   const files = [];
   let pageToken: string | undefined = undefined;
-  do {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const { data } = await drive.files.list({
-      q: "mimeType='application/vnd.google-apps.document' and trashed=false and 'me' in owners",
-      fields: "nextPageToken, files(id,name,owners(displayName),modifiedTime)",
-      pageSize: 100,
-      pageToken,
-    });
-    files.push(...(data.files || []));
-    pageToken = data.nextPageToken;
-  } while (pageToken);
-  return files;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const { data } = await drive.files.list({
+    q: "mimeType='application/vnd.google-apps.document' and trashed=false and 'me' in owners",
+    fields: "nextPageToken, files(id,name,owners(displayName),modifiedTime)",
+    pageSize: 10,
+    pageToken,
+  });
+  files.push(...(data.files || []));
+  pageToken = data.nextPageToken as string;
+  return {
+    files,
+    nextPageToken: pageToken,
+  };
 };
 
 const googleAuthService = {

@@ -48,7 +48,25 @@ const getAppApiKeyByAppId = catchAsyncError(async (req, res) => {
     message: "App Api Key fetched successfully",
   });
 });
+const UpdateAppByAppId = catchAsyncError(async (req, res) => {
+  const user = req.user!;
+  const payload = req.body;
+  const appId = req.params.appId;
+  const result = await clientAppService.UpdateAppByAppId(appId, user.id, payload);
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    data: result,
+    message: "App Api Key fetched successfully",
+  });
+});
 
-const clientAppController = { creatApp, getUsersAllApps, getAppById, getAppApiKeyByAppId };
+const clientAppController = {
+  creatApp,
+  getUsersAllApps,
+  getAppById,
+  getAppApiKeyByAppId,
+  UpdateAppByAppId,
+};
 
 export default clientAppController;
