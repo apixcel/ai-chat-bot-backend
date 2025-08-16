@@ -90,7 +90,8 @@ const clientAppController = {
   getAppById,
   getAppApiKeyByAppId,
   UpdateAppByAppId,
-  deleteAppByAppId,myAppCount
+  deleteAppByAppId,
+  myAppCount,
 };
 
 export default clientAppController;

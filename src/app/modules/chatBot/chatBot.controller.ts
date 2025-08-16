@@ -77,7 +77,7 @@ const getChatBotAccessToken = catchAsyncError(async (req, res) => {
     expireAt: new Date(Date.now() + expirySeconds * 1000).toISOString(),
   };
 
-  setBotAccessToken(newTokenPayload,appSecret);
+  setBotAccessToken(newTokenPayload, appSecret);
 
   sendResponse(res, {
     success: true,
