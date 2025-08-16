@@ -53,11 +53,25 @@ const UpdateAppByAppId = catchAsyncError(async (req, res) => {
   const payload = req.body;
   const appId = req.params.appId;
   const result = await clientAppService.UpdateAppByAppId(appId, user.id, payload);
+
   sendResponse(res, {
     success: true,
     statusCode: 200,
     data: result,
-    message: "App Api Key fetched successfully",
+    message: "App updated successfully",
+  });
+});
+const deleteAppByAppId = catchAsyncError(async (req, res) => {
+  const user = req.user!;
+  const appId = req.params.appId;
+
+  const result = await clientAppService.deleteAppByAppId(appId, user.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    data: result,
+    message: "App deleted successfully",
   });
 });
 
@@ -67,6 +81,7 @@ const clientAppController = {
   getAppById,
   getAppApiKeyByAppId,
   UpdateAppByAppId,
+  deleteAppByAppId,
 };
 
 export default clientAppController;

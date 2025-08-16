@@ -24,7 +24,7 @@ const isAuthenticateUser = (isOptional?: boolean) => {
       try {
         decoded = jwt.verify(token, config.ACCESS_TOKEN.SECRET as string) as IUserJWTPayload;
       } catch {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+        return res.status(401).json({ success: false, message: "AUTH_SESSION_EXPIRED" });
       }
 
       if (!decoded && isOptional === false) {

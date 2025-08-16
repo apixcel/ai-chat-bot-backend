@@ -103,7 +103,6 @@ const UpdateAppByAppId = async (appId: string, userId: string, payload: Partial<
   const app = await prisma.app.findUnique({
     where: { id: appId },
     select: {
-      apiKeyHash: true,
       userId: true,
     },
   });
@@ -122,12 +121,34 @@ const UpdateAppByAppId = async (appId: string, userId: string, payload: Partial<
   return { ...result, apiKeyHash: undefined };
 };
 
+const deleteAppByAppId = async (appId: string, userId: string) => {
+  const app = await prisma.app.findUnique({
+    where: { id: appId },
+    select: {
+      userId: true,
+    },
+  });
+
+  if (!app) {
+    throw new AppError(404, "App not found");
+  }
+
+  if (app.userId !== userId) {
+    throw new AppError(403, "Forbidden");
+  }
+
+  await prisma.app.delete({ where: { id: appId } });
+
+  return null;
+};
+
 const clientAppService = {
   createApp,
   getUsersAllApps,
   getAppById,
   getAppApiKeyByAppId,
   UpdateAppByAppId,
+  deleteAppByAppId,
 };
 
 export default clientAppService;

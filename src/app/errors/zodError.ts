@@ -4,7 +4,7 @@ import { IErrorSources, IGenericErrorRes } from "../interface/error.interface";
 const handleZodError = (error: ZodError): IGenericErrorRes => {
   const errorSources: IErrorSources = error.issues.map((issue: ZodIssue) => {
     return {
-      path: issue?.path[issue.path.length - 1].toString(),
+      path: issue?.path[issue.path.length - 1]?.toString(),
       message: issue?.message,
     };
   });

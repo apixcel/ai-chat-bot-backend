@@ -106,7 +106,13 @@ const login = catchAsyncError(async (req, res) => {
     success: true,
     statusCode: 200,
     message: "Login successful",
-    data: { ...user, password: undefined },
+    data: {
+      result: {
+        ...user,
+        password: undefined,
+      },
+      accessToken,
+    },
   });
 });
 
@@ -208,10 +214,34 @@ const verifyEmail = catchAsyncError(async (req, res) => {
     },
   });
 
+  const accessToken = authUtils.generateAccessToken({
+    email: user.email,
+    id: user.id,
+    role: user.role,
+  });
+
+  const refreshToken = authUtils.generateRefreshToken(user.id);
+  res
+    .cookie("accessToken", accessToken, {
+      sameSite: config.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 1000 * 60 * 60, // 1 hour
+      httpOnly: true,
+      secure: config.NODE_ENV === "production",
+    })
+    .cookie("refreshToken", refreshToken, {
+      sameSite: config.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 1000 * 24 * 60 * 60 * 30, // 30 days
+      httpOnly: true,
+      secure: config.NODE_ENV === "production",
+    });
+
   sendResponse(res, {
     data: {
-      ...result,
-      password: undefined,
+      result: {
+        ...result,
+        password: undefined,
+      },
+      accessToken,
     },
     success: true,
     statusCode: 200,
