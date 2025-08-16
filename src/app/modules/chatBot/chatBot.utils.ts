@@ -19,12 +19,18 @@ const decodeChatBotAccessToken = (token: string) => {
 };
 
 // for caching use redis in future
-let botAccessToken: { token: string; expireAt: string } | null = null;
+const botAccessToken: Record<string, { token: string; expireAt: string }> = {};
 
-export const getBotAccessToken = () => botAccessToken;
+export const getBotAccessToken = (appSecret: string) => botAccessToken[appSecret];
 
-export const setBotAccessToken = ({ token, expireAt }: { token: string; expireAt: string }) => {
-  botAccessToken = { token, expireAt };
+export const setBotAccessToken = (
+  tokenPayload: {
+    token: string;
+    expireAt: string;
+  },
+  appSecret: string
+) => {
+  botAccessToken[appSecret] = tokenPayload;
 };
 
 const getGemini = (model?: string) => {

@@ -68,27 +68,36 @@ const myGoogleConnection = async (userId: string) => {
   return { connected: true, hasRequiredScopes, createdAt: row.createdAt };
 };
 
-const myGoogleDocList = async (userId: string) => {
+const myGoogleDocList = async (
+  userId: string,
+  query: Record<string, string | number | undefined>
+) => {
   const auth = await googleAuthUtils.getAuthForUser(userId);
   if (!auth) {
     throw new AppError(404, "Failed to load Google Docs, please again connect your google account");
   }
   const drive = google.drive({ version: "v3", auth });
-  const files = [];
-  let pageToken: string | undefined = undefined;
+
+  const { searchTerm, nextPageToken } = query;
+
+  let q = "mimeType='application/vnd.google-apps.document' and trashed=false and 'me' in owners";
+
+  if (searchTerm) {
+    q += ` and name contains '${searchTerm}'`;
+  }
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const { data } = await drive.files.list({
-    q: "mimeType='application/vnd.google-apps.document' and trashed=false and 'me' in owners",
+    q: q,
     fields: "nextPageToken, files(id,name,owners(displayName),modifiedTime)",
     pageSize: 10,
-    pageToken,
+    pageToken: nextPageToken || undefined,
   });
-  files.push(...(data.files || []));
-  pageToken = data.nextPageToken as string;
+
   return {
-    files,
-    nextPageToken: pageToken,
+    files: data.files,
+    nextPageToken: data.nextPageToken,
   };
 };
 

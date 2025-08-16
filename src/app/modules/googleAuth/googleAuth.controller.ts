@@ -78,7 +78,8 @@ const myGoogleConnection = catchAsyncError(async (req, res) => {
 });
 
 const myGoogleDocList = catchAsyncError(async (req, res) => {
-  const result = await googleAuthService.myGoogleDocList(req.user!.id);
+  const query = req.query as Record<string, string | number | undefined>;
+  const result = await googleAuthService.myGoogleDocList(req.user!.id, query);
 
   sendResponse(res, {
     data: result,

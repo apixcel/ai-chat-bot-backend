@@ -74,14 +74,23 @@ const deleteAppByAppId = catchAsyncError(async (req, res) => {
     message: "App deleted successfully",
   });
 });
-
+const myAppCount = catchAsyncError(async (req, res) => {
+  const user = req.user!;
+  const count = await clientAppService.myAppCount(user.id);
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    data: { count },
+    message: "Apps fetched successfully",
+  });
+});
 const clientAppController = {
   creatApp,
   getUsersAllApps,
   getAppById,
   getAppApiKeyByAppId,
   UpdateAppByAppId,
-  deleteAppByAppId,
+  deleteAppByAppId,myAppCount
 };
 
 export default clientAppController;

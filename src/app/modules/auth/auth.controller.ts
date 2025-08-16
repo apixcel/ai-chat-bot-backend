@@ -266,9 +266,9 @@ const refreshToken = catchAsyncError(async (req, res) => {
 
   try {
     const decryptedJwt = jwt.verify(refreshToken, config.REFRESH_TOKEN.SECRET as string) as {
-      _id: string;
+      id: string;
     };
-    userId = decryptedJwt._id;
+    userId = decryptedJwt.id;
   } catch {
     userId = null;
   }

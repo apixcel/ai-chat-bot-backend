@@ -14,6 +14,7 @@
     }
   })();
 
+  let token = null;
   class ChatBotSDK {
     constructor(options = {}) {
       this.baseUrl = options.baseUrl || BASE_URL;
@@ -81,7 +82,14 @@
     }
 
     /** Optional UI: render a floating chat widget */
-    render(target = "body") {
+    async render(target = "body") {
+      const tokenRes = await _fetchToken();
+      if (!tokenRes) {
+        return null;
+      }
+      this.token = tokenRes.token;
+      this.expireAt = tokenRes.expireAt;
+
       const host = target === "body" ? document.body : document.querySelector(target);
       if (!host) {
         throw new Error(`Target "${target}" not found`);

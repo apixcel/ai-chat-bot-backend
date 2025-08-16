@@ -142,6 +142,11 @@ const deleteAppByAppId = async (appId: string, userId: string) => {
   return null;
 };
 
+const myAppCount = async (userId: string) => {
+  const count = await prisma.app.count({ where: { userId } });
+  return count;
+};
+
 const clientAppService = {
   createApp,
   getUsersAllApps,
@@ -149,6 +154,7 @@ const clientAppService = {
   getAppApiKeyByAppId,
   UpdateAppByAppId,
   deleteAppByAppId,
+  myAppCount,
 };
 
 export default clientAppService;

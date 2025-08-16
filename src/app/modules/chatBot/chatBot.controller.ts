@@ -19,7 +19,7 @@ const getChatBotAccessToken = catchAsyncError(async (req, res) => {
   }
 
   // Check cached token and validate origin & app existence
-  const cachedToken = getBotAccessToken();
+  const cachedToken = getBotAccessToken(appSecret);
   if (cachedToken) {
     const token = chatBotUtils.decodeChatBotAccessToken(cachedToken.token);
     if (token) {
@@ -45,8 +45,6 @@ const getChatBotAccessToken = catchAsyncError(async (req, res) => {
   if (!app) {
     throw new AppError(403, "Unauthorized");
   }
-
-  console.log(origin);
 
   if (app.authorizedOrigin !== origin) {
     throw new AppError(403, "Unauthorized");
@@ -79,7 +77,7 @@ const getChatBotAccessToken = catchAsyncError(async (req, res) => {
     expireAt: new Date(Date.now() + expirySeconds * 1000).toISOString(),
   };
 
-  setBotAccessToken(newTokenPayload);
+  setBotAccessToken(newTokenPayload,appSecret);
 
   sendResponse(res, {
     success: true,
