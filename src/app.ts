@@ -6,6 +6,7 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import subscriptionWebhook from "./app/modules/subscription/subscription.webhook";
 import router from "./app/routes";
+import sendResponse from "./app/utils/send.response";
 
 const app: Application = express();
 
@@ -31,7 +32,12 @@ app.use("/api/v1", router);
 
 // test route
 app.get("/", (_req: Request, res: Response) => {
-  res.send("server running ⚡⚡⚡ ");
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    data: null,
+    message: "App is running",
+  });
 });
 
 app.use(notFound);

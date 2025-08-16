@@ -75,7 +75,7 @@ const getAppById = async (appId: string, userId: string) => {
     throw new AppError(404, "App not found");
   }
 
-  return { ...app, apiKey: undefined };
+  return { ...app, apiKeyHash: undefined };
 };
 
 const getAppApiKeyByAppId = async (appId: string, userId: string) => {
