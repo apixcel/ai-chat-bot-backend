@@ -1,8 +1,7 @@
-// sdk-template.js
-(function () {
+(async function () {
   const BASE_URL = "http://localhost:5000/api/v1";
-  const APP_SECRET = "__APP_SECRET__"; // injected on the server
-  const CSS_URL = "__CSS_URL__"; // injected on the server
+  const APP_SECRET = "__APP_SECRET__";
+  const CSS_URL = "__CSS_URL__";
 
   // Auto-inject CSS once
   (function injectCSS() {
@@ -14,21 +13,37 @@
     }
   })();
 
-  let token = null;
+  const messageSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+</svg>
+
+`;
+
+  const xSvg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+</svg>
+`;
+
   class ChatBotSDK {
-    constructor(options = {}) {
-      this.baseUrl = options.baseUrl || BASE_URL;
+    constructor() {
+      this.baseUrl = BASE_URL;
       this.token = null;
       this.expireAt = 0; // ms epoch
       this._refreshSkewMs = 60 * 1000; // refresh 60s early
-    }
+      this.style = {
+        bottom: "20px",
+        right: "20px",
+        color: "#615fff",
+      };
+      this.hostImg = `${this.baseUrl.split("/api/v1")[0]}/assets/customer_host.png`;
+      this.hostName = "Customer Support";
+      this.isChatBoxOpen = false;
 
-    /** Internal: do we need a fresh token? */
+      this.isQueryFetching = false;
+    }
     _isExpired() {
       return !this.token || Date.now() >= this.expireAt - this._refreshSkewMs;
     }
-
-    /** Internal: fetch and cache token */
     async _fetchToken() {
       const res = await fetch(`${this.baseUrl}/chat-bot/access-token`, {
         method: "POST",
@@ -46,22 +61,20 @@
       }
       this.token = data.token;
       this.expireAt = new Date(data.expireAt).getTime();
+      return json.data;
     }
-
-    /** Ensure we have a valid token (refresh if needed) */
     async _ensureToken() {
       if (this._isExpired()) {
         await this._fetchToken();
       }
     }
 
-    /** Public: send a query; returns the chatbot text answer */
-    async send(query) {
-      if (!query || !query.trim()) {
+    async getQueryResponse(query) {
+      if (!query || !query.trim() || this.isQueryFetching) {
         return "";
       }
+      this.isQueryFetching = true;
       await this._ensureToken();
-
       const res = await fetch(`${this.baseUrl}/chat-bot/query`, {
         method: "POST",
         headers: {
@@ -77,102 +90,141 @@
       }
 
       const json = await res.json();
+
+      this.isQueryFetching = false;
+
       // Expecting: { success, statusCode, message, data: "query answer" }
-      return json?.data ?? "";
+      return json?.data ?? "Sorry, something went wrong! Please try again.";
     }
 
-    /** Optional UI: render a floating chat widget */
-    async render(target = "body") {
-      const tokenRes = await _fetchToken();
+    async toggle() {
+      const toggleBtn = document.getElementById("cb-toggle-btn");
+      const chatWidget = document.querySelector(".cb-widget");
+      if (!toggleBtn || !chatWidget) return;
+      this.isChatBoxOpen = !this.isChatBoxOpen;
+      toggleBtn.innerHTML = this.isChatBoxOpen ? xSvg : messageSvg;
+      chatWidget.style.display = this.isChatBoxOpen ? "flex" : "none";
+    }
+
+    sendHostMessage(message) {
+      if (!message || !message.trim()) return;
+      const messageContainer = document.querySelector(".cb-messages");
+
+      const innerHTML = `
+        <div class="cb-host-message">
+            <div class="cb-host-avatar"><img src="${this.hostImg}"/></div>
+            <div class="cb-host-message-text" style="background: ${this.style.color}">${message}</div>
+        </div>
+      `;
+
+      messageContainer.innerHTML += innerHTML;
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    async askQuery(query) {
+      if (!query || !query.trim() || this.isQueryFetching) return;
+      const messageContainer = document.querySelector(".cb-messages");
+      const innerrHTML = `<div class="cb-guest-message">
+      <span>${query}</span>
+      </div>`;
+      messageContainer.innerHTML += innerrHTML;
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+
+      this.toggleHostTyping();
+      const message = await this.getQueryResponse(query);
+      this.sendHostMessage(message);
+
+      this.toggleHostTyping();
+    }
+
+    async toggleHostTyping() {
+      const messagesContainer = document.querySelector(".cb-messages");
+      if (!messagesContainer) return;
+
+      const typing = messagesContainer.querySelector("#cb-host-typing");
+      if (typing) {
+        typing.remove();
+        return;
+      }
+
+      messagesContainer.innerHTML += `<div id="cb-host-typing">
+  <span class="cb-host-typing-avatar"><img src="${this.hostImg}"/></span>
+     <div class="cb-host-typing-content">
+     <span class="cb-host-typing-text">${this.hostName} is typing...</span>
+      <div class="cb-host-typing-dots">       
+         <span class="cb-host-typing-dot"></span>
+        <span class="cb-host-typing-dot"></span>
+        <span class="cb-host-typing-dot"></span>
+      </div>
+     </div
+      </div>`;
+    }
+    async render(host = "body") {
+      const tokenRes = await this._fetchToken();
       if (!tokenRes) {
         return null;
       }
       this.token = tokenRes.token;
       this.expireAt = tokenRes.expireAt;
 
-      const host = target === "body" ? document.body : document.querySelector(target);
-      if (!host) {
+      const target = host === "body" ? document.body : document.querySelector(target);
+      if (!target) {
         throw new Error(`Target "${target}" not found`);
       }
 
-      // Container
+      // Wrapper
       const wrapper = document.createElement("div");
-      wrapper.className = "cb-wrapper";
-      wrapper.innerHTML = `
-        <div class="cb-widget">
-          <div class="cb-header">Chat Bot</div>
-          <div class="cb-messages" aria-live="polite"></div>
-          <div class="cb-input-row">
-            <input class="cb-input" type="text" placeholder="Type your message..." />
-            <button class="cb-send">Send</button>
+      wrapper.classList.add("cb-wrapper");
+      wrapper.style.bottom = this.style.bottom;
+      wrapper.style.right = this.style.right;
+
+      // chat widget
+      const widget = document.createElement("div");
+      widget.classList.add("cb-widget");
+      widget.style.display = "none";
+
+      widget.innerHTML = `
+        <div class="cb-widget-header" style="background: ${this.style.color}">
+          <div class="cb-host">
+            <span class="cb-host-avatar"><img src="${this.hostImg}"/></span>
+            <span class="cb-host-name">${this.hostName}</span>
           </div>
         </div>
+        <div class="cb-messages"></div>
+        <form class="cb-input-form">
+          <input class="cb-input" type="text" placeholder="Type your message..." name="cb_query" />
+          <button class="cb-send" type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+</svg>
+</button>
+        </form>
       `;
-      host.appendChild(wrapper);
 
-      const messagesEl = wrapper.querySelector(".cb-messages");
-      const inputEl = wrapper.querySelector(".cb-input");
-      const sendBtn = wrapper.querySelector(".cb-send");
+      wrapper.appendChild(widget);
+      wrapper.innerHTML += `<button type="button" id="cb-toggle-btn" class="cb-toggle" style="background: ${this.style.color}">${messageSvg}</button>`;
 
-      const pushMsg = (role, text) => {
-        const item = document.createElement("div");
-        item.className = `cb-msg cb-msg-${role}`;
-        item.textContent = text;
-        messagesEl.appendChild(item);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      };
+      target?.appendChild(wrapper);
+      const btn = wrapper.querySelector("#cb-toggle-btn");
+      btn.addEventListener("click", () => this.toggle());
+      this.sendHostMessage(`Hi, I'm ${this.hostName}. How can I help you?`);
+      const form = wrapper.querySelector(".cb-input-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (this.isQueryFetching) return;
+        const form = e.target;
+        const inputValu = form.cb_query?.value;
+        form.reset();
 
-      const setLoading = (loading) => {
-        if (loading) {
-          if (!wrapper.querySelector(".cb-loading")) {
-            const l = document.createElement("div");
-            l.className = "cb-loading";
-            l.textContent = "Thinking…";
-            messagesEl.appendChild(l);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-          }
-        } else {
-          const l = wrapper.querySelector(".cb-loading");
-          if (l) {
-            l.remove();
-          }
+        if (inputValu) {
+          await this.askQuery(inputValu);
         }
-      };
-
-      const doSend = async () => {
-        const q = inputEl.value.trim();
-        if (!q) {
-          return;
-        }
-        inputEl.value = "";
-        pushMsg("user", q);
-        setLoading(true);
-        try {
-          const answer = await this.send(q);
-          setLoading(false);
-          pushMsg("bot", answer || "(No answer)");
-        } catch (e) {
-          setLoading(false);
-          pushMsg("error", e.message || "Something went wrong");
-        }
-      };
-
-      sendBtn.addEventListener("click", doSend);
-      inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          doSend();
-        }
-      });
-
-      // Pre-warm token (non-blocking)
-      this._ensureToken().catch(() => {
-        // ignore; will fetch on first send
       });
     }
   }
-
-  // UMD-ish export
   if (typeof window !== "undefined") {
-    window.ChatBotSDK = ChatBotSDK;
+    {
+      await new ChatBotSDK().render();
+    }
   }
 })();

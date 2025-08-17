@@ -73,8 +73,6 @@ const validateBotAccessToken = async (req: IUserInfoRequest, res: Response, next
     }
     const origin = req.get("origin") || new URL(req.get("referer") || "").origin;
 
-    console.log(decoded, origin);
-
     if (decoded.authorizedOrigin !== origin) {
       throw new AppError(403, "Forbidden");
     }

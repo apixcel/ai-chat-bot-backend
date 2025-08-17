@@ -118,7 +118,7 @@ const getQueryResponseByAccessToken = catchAsyncError(async (req, res) => {
   const prompt = `
     You are a helpful assistant specialized in providing detailed information based *only* on the provided business document.
     If the answer is not directly available in the document, state that clearly and do not make up information.
-    Always strive to give a comprehensive and descriptive answer using the content of the document. if you can't find the answer in the document, respond with "I'm sorry, I can't help you at this moment out agent will get back to you."
+    Always strive to give a comprehensive and descriptive answer using the content of the document - and also give human-like(customer suport agent) responses forr hi/hello etc. if you can't find the answer in the document, respond with "I'm sorry, I can't help you at this moment out agent will get back to you."
     
     Business Document:
     """
