@@ -155,7 +155,7 @@ const chatBotSdk = catchAsyncError(async (req, res) => {
   const sdkPath = path.join(process.cwd(), "src/app/sdk/chatbot/script.js");
   let code = fs.readFileSync(sdkPath, "utf-8");
 
-  const base = `http://localhost:5000/assets/style.css`;
+  const base = `http://localhost:5000`;
   const cssURL = `${base}/assets/chatbot.css`;
 
   code = code.replace(/__APP_SECRET__/g, appSecret).replace(/__CSS_URL__/g, cssURL);
